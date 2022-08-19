@@ -1,15 +1,14 @@
 'use strict';
     const Sequelize = require('sequelize');
-    var bcypt = require('bcryptjs');
-    var salt = bcrypt.genSaltSync(10);
-    var hash = bcrypt.hashSync("B4c0/\/", salt);
+    var bcrypt = require('bcryptjs');
+   
 
-    module.exports = (sequelize) => {
+    module.exports = (sequelize, DataTypes) => {
       class User extends Sequelize.Model {}
       User.init(
         {
           id: {
-            type: DataTypes.INTEGER,// sequelize or datatype?
+            type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
           },
@@ -20,9 +19,9 @@
               notNull: {
                 msg: "First name is required",
               },
-                notEmpty: {
-                    msg: "Please provide a name"
-                }
+              notEmpty: {
+                msg: "Please provide a name",
+              },
             },
           },
           lastName: {
@@ -49,18 +48,21 @@
               },
             },
           },
-          Password: {
-            type: DataTypes.STRING,//or vitual?
+          password: {
+            type: DataTypes.STRING,
             allowNull: false,
             set(val) {
-              if (val === this.password) {
+              if (val) {
                 const hashedPassword = bcrypt.hashSync(val, 10);
-                this.setDataValue("Password", hashedPassword);
+                this.setDataValue("password", hashedPassword);
               }
             },
             validate: {
               notNull: {
-                msg: "Both passwords must match",
+                msg: "A password is required",
+              },
+              notEmpty: {
+                msg: "Please provide a password",
               },
             },
           },
@@ -69,7 +71,12 @@
       );
 
       User.associate = (models) => {
-        User.hasMany(models.Course);
+        User.hasMany(models.Course, {
+          foreignKey: {
+            fieldName: "userId",
+            allowNull: false,
+          },
+        });
       };
 
       return User;

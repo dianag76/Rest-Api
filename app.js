@@ -3,34 +3,23 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
-const { sequelize } = require('./models');
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize (
-  {
-    dialect:'sqlite',
-    storage: 'fsjstd-restapi.db'
-  });
-
+const Sequelize = require("./models/index.js").sequelize;
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
-
-//importing router from routes moduke in this file 
-app.use('/api,routes');
-
-
 // create the Express app
 const app = express();
+app.use(express.json());
+ const routes = require("./routes");
+//importing router from routes moduke in this file 
+app.use('/api',routes);
+
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
 //Sequelize authenticate function to test database connection
-sequelize.authenticate().then(() => {
-  console.log('Connection has been established successfully.');
-}).catch((error) => {
-  console.logerror('Unable to connect to the database: ', error);
-});
+
 
 // setup a friendly greeting for the root route
 app.get('/', (req, res) => {
@@ -62,6 +51,17 @@ app.use((err, req, res, next) => {
 app.set('port', process.env.PORT || 5000);
 
 // start listening on our port
-const server = app.listen(app.get('port'), () => {
-  console.log(`Express server is listening on port ${server.address().port}`);
-});
+(async () => {
+  try {
+    await Sequelize.sync();
+    await Sequelize.authenticate();
+    console.log("Connection to the database successful!");
+    const server = await app.listen(app.get("port"), () => {
+      console.log(
+        `Express server is listening on port ${server.address().port}`
+      );
+    });
+  } catch (error) {
+    console.error("Error connecting to the database: ", error);
+  }
+})();
