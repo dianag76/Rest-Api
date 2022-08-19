@@ -31,7 +31,7 @@ router.get(
 
 //Routes that creates a new user
 router.post(
-  "/users", authenticateUser,
+  "/users", 
   asyncHandler(async (req, res) => {
     try {
       await User.create(req.body);
@@ -55,7 +55,7 @@ router.post(
 
 // /api/courses GET
 router.get(
-  "/courses", authenticateUser,
+  "/courses", 
   asyncHandler(async (req, res, next) => {
     const courses = await Course.findAll({
       include: {
@@ -68,7 +68,7 @@ router.get(
 
 // /api/courses/:id GET
 router.get(
-  "/courses/:id", authenticateUser,
+  "/courses/:id",
   asyncHandler(async (req, res, next) => {
     const course = await Course.findByPk(req.params.id, {
       include: {
@@ -85,7 +85,7 @@ router.post(
   asyncHandler(async (req, res, next) => {
     try {
       const courseId = await Course.create(req.body);
-      res.status(201).location(`/courses/${courseId}`).end();
+      res.status(201).location(`/courses/${courseId.id}`).end();
     } catch (err) {
       console.log("ERROR:", err.name);
       if (
